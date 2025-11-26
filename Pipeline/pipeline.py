@@ -1,114 +1,30 @@
-# pipeline.py (enhanced)
-import json
+from pathlib import Path
 import sys
-from transcribe_call import transcribe_audio
-from segment_cases_ml import segment_transcript
-from summarize_cases import process_cases  # NEW — import the improved summarizer
-
-def run_pipeline(audio_path,
-                 merge_min_words=6,
-                 smooth_window=3,
-                 sim_threshold=0.28,
-                 min_segment_words=35,
-                 enable_classification=False):
-    """
-    Full pipeline:
-    1. ASR
-    2. ML segmentation
-    3. Clean summarization (Option A) or classification-aware summarization
-    """
-
-    # ---------------------------
-    # 1) ASR
-    # ---------------------------
-    print("Running ASR...")
-    transcript = transcribe_audio(audio_path)
-
-    # ---------------------------
-    # 2) ML segmentation
-    # ---------------------------
-    print("Segmenting transcript...")
-    segments = segment_transcript(
-        transcript,
-        merge_min_words=merge_min_words,
-        smooth_window=smooth_window,
-        sim_threshold=sim_threshold,
-        min_segment_words=min_segment_words
-    )
-
-    # Save intermediate for consistency
-    with open("cases.json", "w", encoding="utf-8") as f:
-        json.dump({"cases": segments}, f, indent=2, ensure_ascii=False)
-
-    print(f"Saved {len(segments)} segments to cases.json")
-
-    # ---------------------------
-    # 3) Summarization (improved)
-    # ---------------------------
-    print("Summarizing segments...")
-    # This writes summaries.json
-    process_cases(
-        "cases.json",
-        "summaries.json",
-        model_name="sshleifer/distilbart-cnn-12-6",
-        max_len=None,
-        enable_classification=enable_classification
-    )
-
-    # Load summaries for final combined output
-    with open("summaries.json", "r", encoding="utf-8") as f:
-        summary_entries = json.load(f)
-
-    # ---------------------------
-    # 4) Compose pipeline_output.json (merged)
-    # ---------------------------
-    pipeline_out = []
-    for entry in summary_entries:
-        item = {
-            "case_index": entry["case_index"],
-            "text": entry["text"],
-            "summary": entry["summary"]
-        }
-        # If classification enabled, include metadata
-        if enable_classification:
-            item["category"] = entry["category"]
-            item["flags"] = entry["flags"]
-            item["risk_score"] = entry["risk_score"]
-
-        pipeline_out.append(item)
-
-    with open("pipeline_output.json", "w", encoding="utf-8") as fh:
-        json.dump(pipeline_out, fh, indent=2, ensure_ascii=False)
-
-    print("Saved pipeline_output.json")
-    return pipeline_out
-
-
-# ---------------------------
-# CLI entry point
-# ---------------------------
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python pipeline.py sample_call.wav")
-        sys.exit(1)
-
-    audio = sys.argv[1]
-    run_pipeline(audio)
-
-# pipeline.py (enhanced with CSV & XLSX outputs)
 import json
-import sys
 import os
-from transcribe_call import transcribe_audio
-from segment_cases_ml import segment_transcript
-from summarize_cases import process_cases  # improved summarizer (Option A default)
+
+# ---------------------------
+# Make project root importable
+# ---------------------------
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# ---------------------------
+# Imports from your folders
+# ---------------------------
+from ASR.transcribe_call import transcribe_audio
+from Segment.segment_cases_ml import segment_transcript
+from Summary.summarize_cases import process_cases  # improved summarizer (Option A default)
 
 # local path to the original uploaded project export (kept as metadata)
 SOURCE_EXPORT_PATH = "/mnt/data/AIPRM-export-chatgpt-thread_Call-center-case-segmentation_2025-11-20T23_27_47.292Z.md"
 
+
 def write_json(path, data):
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(data, fh, ensure_ascii=False, indent=2)
+
 
 def write_csv(path, rows, fieldnames):
     """
@@ -122,6 +38,7 @@ def write_csv(path, rows, fieldnames):
         writer.writeheader()
         for r in rows:
             writer.writerow(r)
+
 
 def write_xlsx(path, rows, fieldnames):
     """
@@ -141,6 +58,7 @@ def write_xlsx(path, rows, fieldnames):
     df = df[fieldnames]
     # write excel (openpyxl engine used by default)
     df.to_excel(path, index=False)
+
 
 def run_pipeline(audio_path,
                  merge_min_words=6,
@@ -176,11 +94,16 @@ def run_pipeline(audio_path,
     write_json("cases.json", cases_obj)
     print(f"Saved {len(segments)} segments to cases.json")
 
-    # 3) Summarization using summarize_cases.process_cases
-    # process_cases writes summaries.json and returns nothing; we'll read it back
+    # 3) Summarization using Summary.summarize_cases.process_cases
+    # NOTE: your summarize_cases.py should accept 'classify=' for classification toggle
     print("Summarizing segments...")
-    # process_cases signature: (input_path, output_path, model_name=..., max_len=None, classify=False)
-    process_cases("cases.json", "summaries.json", model_name=summarizer_model, max_len=None, classify=enable_classification)
+    process_cases(
+        "cases.json",
+        "summaries.json",
+        model_name=summarizer_model,
+        max_len=None,
+        classify=enable_classification,
+    )
 
     # 4) Load summaries and combine into pipeline output
     with open("summaries.json", "r", encoding="utf-8") as fh:
@@ -237,13 +160,17 @@ def run_pipeline(audio_path,
         write_xlsx("pipeline_output.xlsx", csv_rows, csv_fieldnames)
         print("Saved pipeline_output.xlsx")
     except ImportError:
-        print("pandas not available in environment — skipping XLSX. To enable XLSX, install pandas and openpyxl.")
+        print("pandas not available in environment — skipping XLSX. "
+              "To enable XLSX, install pandas and openpyxl.")
     except Exception as e:
         print(f"Failed to write XLSX: {e}")
 
     return pipeline_out
 
+
+# ---------------------------
 # CLI entrypoint
+# ---------------------------
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python pipeline.py sample_call.wav")
