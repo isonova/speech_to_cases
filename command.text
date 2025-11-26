@@ -1,0 +1,163 @@
+# Default target
+make build
+make asr
+make segment
+make summarize
+make pipeline
+make clean
+make pipeline
+
+0) Prerequisites (one-time)
+
+Docker Desktop installed & running, WSL2 enabled (you already have this).
+VS Code (you said you use it).
+
+Create an HF cache folder on Windows for model downloads (recommended):
+
+PowerShell:
+mkdir C:\Users\isode\hf_cache
+
+
+CMD:
+md C:\Users\isode\hf_cache
+
+
+
+2) Build Docker image
+
+Open VS Code terminal in the project folder.
+
+PowerShell:
+cd C:\Users\isode\speech_to_cases
+docker build -t whisper-pipeline .
+
+
+CMD:
+cd C:\Users\isode\speech_to_cases
+docker build -t whisper-pipeline .
+
+(First build may take several minutes — downloads model wheels and HF libs.)
+
+
+3) Run ASR (Whisper) — produce transcript.txt
+
+PowerShell:
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python transcribe_call.py sample_call.wav
+
+
+CMD:
+docker run --rm -v %cd%:/app -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python transcribe_call.py sample_call.wav
+
+
+Result:
+transcript.txt will be written in your host folder and printed to terminal.
+
+
+4) Run segmentation (semantic ML) → produces cases.json
+
+PowerShell:
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python segment_cases_ml.py transcript.txt
+
+
+CMD:
+docker run --rm -v %cd%:/app -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python segment_cases_ml.py transcript.txt
+
+
+Result:
+Terminal prints --- CASE N --- blocks.
+
+cases.json is created (format: {"cases": [ "...", ... ]}).
+
+
+5) Inspect / optionally tweak segmentation
+
+If you want fewer segments, edit segment_cases_ml.py and change these params when calling segment_transcript():
+
+merge_min_words (increase merges more: 8–12)
+sim_threshold (lower → fewer boundaries; 0.25→fewer)
+min_segment_words (increase to 45–60)
+smooth_window (increase smoothing: 5)
+Re-run segmentation command in step 4.
+
+
+6) Summarize the cases → produces summaries.json
+
+PowerShell (auto-adjusting max length):
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python summarize_cases.py cases.json
+
+
+If you want strict short summaries, pass --max_len:
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python summarize_cases.py cases.json --max_len 30
+
+
+Result:
+summaries.json saved; terminal prints the summaries and the file path.
+
+
+7) One-command end-to-end: ASR → segmentation → summarization
+
+PowerShell:
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python pipeline.py sample_call.wav
+
+CMD:
+docker run --rm -v %cd%:/app -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python pipeline.py sample_call.wav
+
+Result:
+pipeline_output.json is created with case_index, text, summary.
+
+
+
+8) Useful helper commands
+
+View pipeline_output.json quickly (PowerShell):
+Get-Content .\pipeline_output.json -Raw | Out-String
+
+
+Rebuild only when you changed Dockerfile or dependencies:
+docker build -t whisper-pipeline .
+
+
+Remove local images to free space:
+docker image rm whisper-pipeline
+
+
+Tail logs (if you have a long-run container):
+docker logs -f <container-id>
+
+
+9) Optional: docker-compose (one-time file)
+
+Create docker-compose.yml to simplify runs. Example:
+version: "3.8"
+services:
+  pipeline:
+    image: whisper-pipeline
+    build: .
+    volumes:
+      - ./:/app
+      - C:\Users\isode\hf_cache:/root/.cache/huggingface
+    # entrypoint can be overridden at runtime
+
+
+Use:
+docker-compose run --rm pipeline python pipeline.py sample_call.wav
+
+
+10) Tuning checklist (what to tweak later)
+
+Segmentation: sim_threshold, merge_min_words, min_segment_words, smooth_window.
+Summarization: --max_len or model (lighter or heavier).
+Performance: use smaller models (e.g., all-MiniLM-L6-v2 embeddings, distil summarizer) for CPU.
+Memory: increase Docker Desktop RAM in Settings if builds or runs OOM.
+Cache: always mount HF cache to speed up repeated runs.
+
+
+11) Minimal “runbook” (short cheat sheet)
+
+cd C:\Users\isode\speech_to_cases
+docker build -t whisper-pipeline .
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python transcribe_call.py sample_call.wav
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python segment_cases_ml.py transcript.txt
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python summarize_cases.py cases.json
+—or— step 3 and then—
+docker run --rm -v "${PWD}:/app" -v C:\Users\isode\hf_cache:/root/.cache/huggingface whisper-pipeline python pipeline.py sample_call.wav

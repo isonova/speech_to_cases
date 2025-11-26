@@ -1,0 +1,32 @@
+[
+  {
+    "case_index": 1,
+    "text": "Hello. Hello, my name is Steven. I'm calling you from the Finance Department of the online company. You were speaking with Michael before and your manager is Mr. Omar, correct? Okay. All right. So yeah, I was calling you to help you because we were trying to find a solution and a way to make very quick and easy withdrawal of your money on the platform back to your bank. So I think we finally found an option and that's why I'm calling you to help you with that. So it will just take another five to ten minutes for the crime. If you're available, I would like to guide you through the steps and see if you can work out together. So are you available for me to help you with that? Yes. Okay. Wonderful. Now I will ask you please open any desk and give me the any desk on your computer. Okay. And the numbers? One, five, five. Okay. Okay. I will help you over here, okay? Okay. I guess, of course you. Okay. Now the name of the app is like this. It's a very colorful website. So we will try to verify you.",
+    "summary": "Steven is calling from the Finance Department of the online company . He says he's trying to find a way to make quick and easy withdrawal of your money on the platform back to your bank . Steven: \"I think we finally found an option and that's why I'm calling you to help you\"",
+    "summary_clean": "Agent discusses returning/withdrawing funds or bank transfer steps."
+  },
+  {
+    "case_index": 2,
+    "text": "I'm not sure if the phone is required. We will try to do it on the computer. It's probably we'll do it on the phone. Okay. Okay. Okay. Let me let me do it for you. Let me use your mouse. Yeah, we can do it only on the phone. Which phone are you using? Pixel. Pixel. It's a Google Pixel. Yeah. Okay. Okay. Maryam, let me ask you. Your phone, the one you said you are using Pixel phone. Is it an Android? Yes, it's an Android. Okay.",
+    "summary": "I'm not sure if the phone is required, we will try to do it on the computer . Maryam, let me ask you. Your phone, the one you said you are using, is an Android? Yes, it's an Android .",
+    "summary_clean": "I'm not sure if the phone is required, we will try to do it on the computer. Maryam, let me ask you. Your phone, the."
+  },
+  {
+    "case_index": 3,
+    "text": "Let me let's test if we can do something. Can you download any desk on your phone? Try to download any desk on your phone and we will try to do it together on your phone. Okay. Okay. Let's try to download any desk on your phone. Let's try to download any desk on your phone. Let's try to download any desk on your phone. Okay. And when you open it, tell me the numbers, please, on your phone. One, one, zero, nine. One, eight, five, eight, five, nine. You're going to see a check box here.",
+    "summary": "Try to download any desk on your phone and we will try to do it together . One, one, zero, nine and one, eight, five, eight . You're going to see a check box here. When you open it, tell me the numbers .",
+    "summary_clean": "Agent asks user to install a remote-access app (AnyDesk/TeamViewer) and provide the connection code."
+  },
+  {
+    "case_index": 4,
+    "text": "Please accept them. Yeah. Put a check in the boxes and then click on accept. On the bottom left, you should see like a small box that you can put a check mark there. And then click on start now. Yeah. Click on start. Did you click on start now? Yeah. Okay. And what do you see on the phone? Support. Support. Here it's that. What do you see on the screen? Okay. There. Help us improve. This is support. Any desk like all you like desk. Say it again, please. Support to make sure. Now, yeah. Yeah, it's me, but it's not showing me connected. I think do you see your icon? It says choose what to share. Okay. You choose what to share. Okay. Okay. I see. All right. Because of yeah, you have the pixel one. We cannot, we cannot share the pixel phone. Do you have any other corner on this one? I have some phone. We have some. Oh, that would be, that would be wonderful. Can you download any desk on your Samsung phone? Because pixels are allowed only Samsung and Motorola. Can we take phone through? Sorry. I will take my phone to my daughter because she's using it. I will be fine. I will be fine. I will be fine. You want to add them too? Sorry? Yeah, I need desktop to my daughter. Okay. Hello? Yeah, I have to download the... Are you back here? Okay. I have it downloaded already. All right. Give me the number. __________ Okay. You're going to see a pop up.",
+    "summary": "Help us improve. Put a check in the boxes and then click on accept . On the bottom left, you should see like a small box that you can put a check mark there . Click on start now. And what do you see on the phone? Support .",
+    "summary_clean": "Help us improve. Put a check in the boxes and then click on accept. On the bottom left, you should see like a small box."
+  },
+  {
+    "case_index": 5,
+    "text": "You need the same way. Just accept the boxes and then click on accept and start now. Click on accept and start now. Start now. Just one moment. Click on the blue circle in the middle. Click on the top left corner of the arrow. Click on the white dots in the middle. Click on the blue circle in the middle. Click on the blue circle in the middle. Click on the blue circle in the middle. Click on the blue circle in the middle. Click on the blue circle in the middle. Click on the blue circle in the middle. Click on the blue circle in the middle.",
+    "summary": "Just accept the boxes and then click on accept and start now . You need the same way . Click on the blue circle in the middle. Click on accept .",
+    "summary_clean": "Just accept the boxes and then click on accept and start now. You need the same way. Click on the blue circle in the middle.."
+  }
+]
